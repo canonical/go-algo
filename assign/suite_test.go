@@ -1,0 +1,17 @@
+package assign_test
+
+import (
+	"testing"
+
+	. "gopkg.in/check.v1"
+)
+
+func Test(t *testing.T) { TestingT(t) }
+
+type S struct{}
+
+var _ = Suite(&S{})
+
+func (s *S) SetUpTest(c *C) {}
+
+func (s *S) TearDownTest(c *C) {}
