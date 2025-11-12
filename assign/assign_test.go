@@ -135,6 +135,19 @@ var deltaTests = []deltaTest{{
 		namePair{"-", "y"}: maxCost,
 	},
 }, {
+	summary: "Prefer simple deletions",
+	costs: costMap{
+		namePair{"a", "a"}: 0,
+		namePair{"a", "b"}: 1,
+		namePair{"b", "a"}: 1,
+	},
+	source: []any{"b", "a"},
+	target: []any{"a"},
+	result: costMap{
+		namePair{"a", "a"}: 0,
+		namePair{"b", "-"}: maxCost - 1,
+	},
+}, {
 	summary: "Prefer simple insertions",
 	costs: costMap{
 		namePair{"a", "a"}: 0,
