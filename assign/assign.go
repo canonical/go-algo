@@ -109,7 +109,7 @@ func Assign(sources, targets []any, options *AssignOptions) []Pair {
 			result = append(result, Pair{Source: sources[i], Target: nil, Cost: cost})
 		case i >= n && j < m:
 			// Insert
-			result = append(result, Pair{Source: nil, Target: targets[i], Cost: cost})
+			result = append(result, Pair{Source: nil, Target: targets[j], Cost: cost})
 		}
 	}
 

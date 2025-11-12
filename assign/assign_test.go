@@ -134,6 +134,19 @@ var deltaTests = []deltaTest{{
 		namePair{"x", "-"}: maxCost,
 		namePair{"-", "y"}: maxCost,
 	},
+}, {
+	summary: "Prefer simple insertions",
+	costs: costMap{
+		namePair{"a", "a"}: 0,
+		namePair{"a", "b"}: 1,
+		namePair{"b", "a"}: 1,
+	},
+	source: []any{"a"},
+	target: []any{"b", "a"},
+	result: costMap{
+		namePair{"-", "b"}: maxCost - 1,
+		namePair{"a", "a"}: 0,
+	},
 }}
 
 func benchmarkDelta(n int, b *testing.B) {
