@@ -18,11 +18,11 @@ var (
 	maxCost = uintCost(1 << 31) // A very large cost to represent "impossible" or highly undesirable edits.
 )
 
-type agent struct {
+type agentType struct {
 	id int
 }
 
-type task struct {
+type taskType struct {
 	id int
 }
 
@@ -35,20 +35,20 @@ func editCost(source, target any) assign.Cost {
 		return minCost
 	}
 
-	svalue, sok := source.(agent)
-	tvalue, tok := target.(task)
-	if !sok || !tok {
+	agent, aok := source.(agentType)
+	task, tok := target.(taskType)
+	if !aok || !tok {
 		panic("unknown value type")
 	}
 
 	// Known costs for possible agent-task assignments.
-	cost := map[int]map[int]uintCost{
+	agentTaskCosts := map[int]map[int]uintCost{
 		0: {0: 8, 1: 4, 2: 7},
 		1: {0: 5, 1: 2, 2: 3},
 		2: {0: 9, 1: 6, 2: 7},
 		3: {0: 9, 1: 4, 2: 8},
 	}
-	return cost[svalue.id][tvalue.id]
+	return agentTaskCosts[agent.id][task.id]
 }
 
 func main() {
@@ -59,19 +59,19 @@ func main() {
 }
 
 func run() error {
-	sources := []any{agent{id: 0}, agent{id: 1}, agent{id: 2}, agent{id: 3}}
-	targets := []any{task{id: 0}, task{id: 1}, task{id: 2}}
+	sources := []any{agentType{id: 0}, agentType{id: 1}, agentType{id: 2}, agentType{id: 3}}
+	targets := []any{taskType{id: 0}, taskType{id: 1}, taskType{id: 2}}
 
 	options := &assign.AssignOptions{
 		NodeKey: func(node any) any {
-			// NodeKey is used to identify nodes. For agent and task, the id serves as a unique identifier.
-			// While not directly used by the Hungarian algorithm for cost, it's a required field
-			// and provides a logical identifier for the nodes.
-			if agent, ok := node.(agent); ok {
-				return agent.id
+			// NodeKey is used to identify nodes. For agent and task, agent-id and task-id serves
+			// as a unique identifier. While not directly used by the Hungarian algorithm for cost,
+			// it's a required field and provides a logical identifier for the nodes.
+			if agent, ok := node.(agentType); ok {
+				return fmt.Sprintf("agent-%d", agent.id)
 			}
-			if task, ok := node.(task); ok {
-				return task.id
+			if task, ok := node.(taskType); ok {
+				return fmt.Sprintf("task-%d", task.id)
 			}
 			return nil // Should not happen with valid agent/task inputs
 		},
@@ -90,16 +90,16 @@ func run() error {
 
 	// Process and print the diff results in the requested format.
 	for _, p := range pairs {
-		svalue, sok := p.Source.(agent)
-		tvalue, tok := p.Target.(task)
+		agent, aok := p.Source.(agentType)
+		task, tok := p.Target.(taskType)
 
-		if !sok || !tok {
+		if !aok || !tok {
 			// Made-up assignment with nil agent/task and minCost to balance number of agents
 			// and tasks as required by the Hungarian Algorithm, skip these.
 			continue
 		}
 
-		fmt.Printf("Agent: %d => Task: %d (with cost: %d)\n", svalue.id, tvalue.id, editCost(svalue, tvalue))
+		fmt.Printf("Agent: %d => Task: %d (with cost: %d)\n", agent.id, task.id, editCost(agent, task))
 	}
 	return nil
 }
