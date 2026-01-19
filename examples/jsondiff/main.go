@@ -8,8 +8,8 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/canonical/editdelta/assign"
-	"github.com/canonical/editdelta/listdist"
+	"github.com/canonical/go-algo/assign"
+	"github.com/canonical/go-algo/listdist"
 )
 
 // Custom Cost type, mirroring the one used in edit_test.go for consistency.
