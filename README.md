@@ -31,3 +31,9 @@ implementaion for wildcard matching (*, **, ?).
 ### listdist
 
 This is strdist reshaped to work with lists instead of strings.
+
+### listedit
+
+Similar to listdist but also returns the exact edit operations to transform one list to another.
+
+The full edit distance matrix is kept in memory in order to calculate the edit steps, so if only distance is required use listdist instead.
