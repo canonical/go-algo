@@ -1,6 +1,6 @@
 module github.com/canonical/go-algo
 
-go 1.24.6
+go 1.23.3
 
 require (
 	github.com/kr/pretty v0.2.1 // indirect
