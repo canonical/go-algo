@@ -45,20 +45,28 @@ func StandardCost(ar, br rune) Cost {
 	return Cost{SwapAB: 1, DeleteA: 1, InsertB: 1}
 }
 
+// Distance returns the edit distance between two strings. The cost per edit is
+// given by the costFunc argument.
+//
+// There is an optional cut argument that when set will finish the computation
+// as early as possible once the final cost is certain to be >= cut. There is
+// no guarantee about the exact cost returned when this is the case other than
+// being >= cut. In particular, when cut is used, the function is not symmetric
+// on a and b.
 func Distance(a, b string, f CostFunc, cut int64) int64 {
 	if a == b {
 		return 0
 	}
 	lst := make([]CostInt, len(b)+1)
 	bl := 0
-	for bi, br := range b {
-		bl++
+	for _, br := range b {
 		cost := f(-1, br)
-		if cost.InsertB == Inhibit || lst[bi] == Inhibit {
-			lst[bi+1] = Inhibit
+		if cost.InsertB == Inhibit || lst[bl] == Inhibit {
+			lst[bl+1] = Inhibit
 		} else {
-			lst[bi+1] = lst[bi] + cost.InsertB
+			lst[bl+1] = lst[bl] + cost.InsertB
 		}
+		bl++
 	}
 	lst = lst[:bl+1]
 	for _, ar := range a {
@@ -70,6 +78,9 @@ func Distance(a, b string, f CostFunc, cut int64) int64 {
 			lst[0] = last + cost.DeleteA
 		}
 		stop := true
+		if lst[0] < CostInt(cut) {
+			stop = false
+		}
 		i := 0
 		for _, br := range b {
 			i++
@@ -130,11 +141,16 @@ func globCost(ar, br rune) Cost {
 	if ar == '⁑' || br == '⁑' {
 		return Cost{SwapAB: 0, DeleteA: 0, InsertB: 0}
 	}
-	if ar == '/' || br == '/' {
-		return Cost{SwapAB: Inhibit, DeleteA: Inhibit, InsertB: Inhibit}
+	if ar == '*' && br == '/' {
+		return Cost{SwapAB: Inhibit, DeleteA: 0, InsertB: Inhibit}
+	} else if ar == '/' && br == '*' {
+		return Cost{SwapAB: Inhibit, DeleteA: Inhibit, InsertB: 0}
 	}
 	if ar == '*' || br == '*' {
 		return Cost{SwapAB: 0, DeleteA: 0, InsertB: 0}
+	}
+	if ar == '/' || br == '/' {
+		return Cost{SwapAB: Inhibit, DeleteA: Inhibit, InsertB: Inhibit}
 	}
 	if ar == '?' || br == '?' {
 		return Cost{SwapAB: 0, DeleteA: 1, InsertB: 1}
